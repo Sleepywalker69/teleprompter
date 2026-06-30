@@ -1,0 +1,151 @@
+<Window x:Class="Teleprompter.Windows.ControlWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Teleprompter — Control"
+        Height="720" Width="1100"
+        WindowStartupLocation="CenterScreen"
+        Background="#1E1E1E">
+
+    <Window.Resources>
+        <Style TargetType="TextBlock">
+            <Setter Property="Foreground" Value="#DDDDDD" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+        <Style TargetType="Label">
+            <Setter Property="Foreground" Value="#DDDDDD" />
+        </Style>
+        <Style TargetType="Button">
+            <Setter Property="Padding" Value="12,6" />
+            <Setter Property="Margin" Value="0,0,8,0" />
+        </Style>
+        <Style TargetType="CheckBox">
+            <Setter Property="Foreground" Value="#DDDDDD" />
+            <Setter Property="Margin" Value="0,6" />
+        </Style>
+    </Window.Resources>
+
+    <Grid Margin="14">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="360" />
+        </Grid.ColumnDefinitions>
+
+        <!-- LEFT: script editor + estimate + playback -->
+        <DockPanel Grid.Row="0" Grid.Column="0" Margin="0,0,14,0">
+            <TextBlock DockPanel.Dock="Top" Text="Script" FontSize="16" FontWeight="Bold" Margin="0,0,0,6" />
+
+            <Border DockPanel.Dock="Bottom" Background="#252526" Padding="10" Margin="0,10,0,0" CornerRadius="4">
+                <StackPanel>
+                    <WrapPanel Margin="0,0,0,8">
+                        <TextBlock Text="Words: " />
+                        <TextBlock Text="{Binding WordCount}" FontWeight="Bold" Margin="0,0,16,0" />
+                        <TextBlock Text="Estimated read time: " />
+                        <TextBlock Text="{Binding EstimatedDurationText}" FontWeight="Bold" Foreground="#4EC9B0" />
+                    </WrapPanel>
+
+                    <Grid Margin="0,4">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="130" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="56" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="Speed (WPM)" />
+                        <Slider Grid.Column="1" Minimum="60" Maximum="300" VerticalAlignment="Center"
+                                Value="{Binding WordsPerMinute, Mode=TwoWay}" />
+                        <TextBlock Grid.Column="2" Text="{Binding WordsPerMinute}" TextAlignment="Right" />
+                    </Grid>
+
+                    <Grid Margin="0,4">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="130" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="56" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="Font size" />
+                        <Slider Grid.Column="1" Minimum="16" Maximum="120" VerticalAlignment="Center"
+                                Value="{Binding FontSize, Mode=TwoWay}" />
+                        <TextBlock Grid.Column="2" Text="{Binding FontSize, StringFormat={}{0:0}}" TextAlignment="Right" />
+                    </Grid>
+
+                    <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                        <Button x:Name="OpenPrompterButton" Content="Open prompter" Click="OnOpenPrompter" />
+                        <Button x:Name="PlayPauseButton" Content="Play" Click="OnPlayPause" />
+                        <Button Content="Restart" Click="OnRestart" />
+                        <Button Content="◀ Prev" Click="OnPrev" />
+                        <Button Content="Next ▶" Click="OnNext" />
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <TextBox x:Name="ScriptBox"
+                     AcceptsReturn="True" AcceptsTab="True"
+                     TextWrapping="Wrap"
+                     VerticalScrollBarVisibility="Auto"
+                     Background="#252526" Foreground="#EEEEEE"
+                     FontSize="15" Padding="8"
+                     Text="{Binding ScriptText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+        </DockPanel>
+
+        <!-- RIGHT: prompter options + incoming-audio transcription -->
+        <StackPanel Grid.Row="0" Grid.Column="1">
+            <TextBlock Text="Prompter options" FontSize="16" FontWeight="Bold" Margin="0,0,0,6" />
+            <Border Background="#252526" Padding="10" CornerRadius="4">
+                <StackPanel>
+                    <CheckBox Content="Auto-advance (listen to my mic)"
+                              IsChecked="{Binding AutoAdvanceEnabled, Mode=TwoWay}"
+                              Checked="OnAutoAdvanceChanged" Unchecked="OnAutoAdvanceChanged" />
+                    <TextBlock Text="When on, finishing a sentence out loud moves the prompter forward (no WPM needed)."
+                               TextWrapping="Wrap" FontSize="11" Foreground="#999999" Margin="22,0,0,6" />
+                    <CheckBox Content="Mirror mode (for beam-splitter rigs)"
+                              IsChecked="{Binding MirrorMode, Mode=TwoWay}" />
+                    <CheckBox Content="Click-through overlay"
+                              IsChecked="{Binding ClickThrough, Mode=TwoWay}" />
+
+                    <Grid Margin="0,8,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="110" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="44" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="Overlay height" />
+                        <Slider Grid.Column="1" Minimum="0.15" Maximum="0.6" VerticalAlignment="Center"
+                                Value="{Binding OverlayHeightFraction, Mode=TwoWay}" />
+                        <TextBlock Grid.Column="2" TextAlignment="Right"
+                                   Text="{Binding OverlayHeightFraction, StringFormat={}{0:P0}}" />
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <TextBlock Text="Incoming-audio transcription" FontSize="16" FontWeight="Bold" Margin="0,16,0,6" />
+            <Border Background="#252526" Padding="10" CornerRadius="4">
+                <StackPanel>
+                    <TextBlock Text="Transcribes the audio you HEAR (the other party). Your mic is never transcribed here."
+                               TextWrapping="Wrap" FontSize="11" Foreground="#999999" Margin="0,0,0,8" />
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                        <Button x:Name="ListenButton" Content="Start listening" Click="OnToggleListen" />
+                        <Button Content="Copy all" Click="OnCopyAll" />
+                        <Button Content="Clear" Click="OnClearTranscript" />
+                    </StackPanel>
+                    <TextBox x:Name="TranscriptBox"
+                             IsReadOnly="True"
+                             TextWrapping="Wrap"
+                             Height="240"
+                             VerticalScrollBarVisibility="Auto"
+                             Background="#1B1B1B" Foreground="#EEEEEE"
+                             FontSize="14" Padding="8"
+                             Text="{Binding TranscriptionText, Mode=OneWay}"
+                             TextChanged="OnTranscriptTextChanged" />
+                </StackPanel>
+            </Border>
+        </StackPanel>
+
+        <!-- STATUS BAR -->
+        <Border Grid.Row="1" Grid.ColumnSpan="2" Background="#007ACC" Margin="0,12,0,0" Padding="10,5" CornerRadius="3">
+            <TextBlock x:Name="StatusText" Text="Ready." Foreground="White" />
+        </Border>
+    </Grid>
+</Window>

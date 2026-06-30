@@ -1,0 +1,35 @@
+<Window x:Class="Teleprompter.Windows.PrompterWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Teleprompter"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="Transparent"
+        Topmost="True"
+        ResizeMode="NoResize"
+        ShowInTaskbar="False"
+        ShowActivated="False">
+
+    <!-- Semi-transparent dark backdrop so the text is readable over anything -->
+    <Border Background="#CC000000">
+        <Grid x:Name="ClipHost" ClipToBounds="True">
+            <Grid.LayoutTransform>
+                <!-- Mirror mode for hardware teleprompter rigs (ScaleX = -1) -->
+                <ScaleTransform x:Name="MirrorTransform" ScaleX="1" ScaleY="1" />
+            </Grid.LayoutTransform>
+
+            <TextBlock x:Name="PrompterText"
+                       Foreground="#888888"
+                       FontWeight="Light"
+                       TextAlignment="Center"
+                       TextWrapping="Wrap"
+                       LineHeight="1.6"
+                       Padding="60,20"
+                       VerticalAlignment="Top">
+                <TextBlock.RenderTransform>
+                    <TranslateTransform x:Name="ScrollTransform" Y="0" />
+                </TextBlock.RenderTransform>
+            </TextBlock>
+        </Grid>
+    </Border>
+</Window>

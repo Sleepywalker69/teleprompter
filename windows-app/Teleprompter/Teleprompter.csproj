@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+    <AssemblyName>Teleprompter</AssemblyName>
+    <RootNamespace>Teleprompter</RootNamespace>
+    <Platforms>x64</Platforms>
+    <PlatformTarget>x64</PlatformTarget>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Microphone capture + WASAPI loopback (system/incoming audio) -->
+    <PackageReference Include="NAudio" Version="2.2.1" />
+
+    <!-- High-accuracy offline transcription of incoming/loopback audio.
+         Whisper.net.Runtime.Cuda gives GPU acceleration on the RTX 2080;
+         the plain Whisper.net.Runtime is the CPU fallback bundled alongside. -->
+    <PackageReference Include="Whisper.net" Version="1.8.1" />
+    <PackageReference Include="Whisper.net.Runtime" Version="1.8.1" />
+    <PackageReference Include="Whisper.net.Runtime.Cuda" Version="1.8.1" />
+
+    <!-- Lightweight streaming recognizer for the mic/outgoing follow-mode -->
+    <PackageReference Include="Vosk" Version="0.3.38" />
+  </ItemGroup>
+
+</Project>

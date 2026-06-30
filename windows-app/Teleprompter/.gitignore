@@ -1,0 +1,13 @@
+# .NET build output
+bin/
+obj/
+
+# Downloaded speech models (fetched on first run into %LOCALAPPDATA%, but
+# ignore any that land here too)
+*.bin
+vosk-model-*/
+*.zip
+
+# IDE
+.vs/
+*.user
