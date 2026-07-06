@@ -1,5 +1,6 @@
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
 using Teleprompter.Models;
 using Teleprompter.Services;
 
@@ -31,6 +32,33 @@ public partial class ControlWindow : Window
     }
 
     private void SetStatus(string message) => StatusText.Text = message;
+
+    // --- Status severity (added for the design pass) -----------------------
+    // The single-arg SetStatus above is left intact: it is handed to
+    // Progress<string> as an Action<string> for model-download progress.
+    // This overload additionally themes the status bar per severity.
+    private enum StatusLevel { Info, Busy, Live, Error }
+
+    private void SetStatus(string message, StatusLevel level)
+    {
+        StatusText.Text = message;
+        ApplyStatusLevel(level);
+    }
+
+    private void ApplyStatusLevel(StatusLevel level)
+    {
+        (string bg, string border, string dot, bool busy) = level switch
+        {
+            StatusLevel.Busy  => ("Status.Progress.Bg", "Status.Progress.Border", "AccentBrush", true),
+            StatusLevel.Live  => ("Status.Live.Bg", "Status.Live.Border", "AccentBrush", false),
+            StatusLevel.Error => ("Status.Error.Bg", "Status.Error.Border", "DangerBrush", false),
+            _                 => ("Status.Info.Bg", "Status.Info.Border", "TextTertiaryBrush", false),
+        };
+        StatusBar.Background = (Brush)FindResource(bg);
+        StatusBar.BorderBrush = (Brush)FindResource(border);
+        StatusDot.Fill = (Brush)FindResource(dot);
+        BusyBar.Visibility = busy ? Visibility.Visible : Visibility.Collapsed;
+    }
 
     private PrompterWindow EnsurePrompter()
     {
@@ -88,25 +116,25 @@ public partial class ControlWindow : Window
         {
             try
             {
-                SetStatus("Preparing mic follow-mode…");
+                SetStatus("Preparing mic follow-mode…", StatusLevel.Busy);
                 await _models.EnsureVoskModelAsync(new Progress<string>(SetStatus));
 
                 _mic ??= CreateMic();
                 _micCanAdvance = true;
                 _mic.Start();
                 EnsurePrompter();
-                SetStatus("Listening to your mic — read aloud to advance.");
+                SetStatus("Listening to your mic — read aloud to advance.", StatusLevel.Live);
             }
             catch (Exception ex)
             {
                 _state.AutoAdvanceEnabled = false; // revert toggle
-                SetStatus($"Could not start follow-mode: {ex.Message}");
+                SetStatus($"Could not start follow-mode: {ex.Message}", StatusLevel.Error);
             }
         }
         else
         {
             _mic?.Stop();
-            SetStatus("Follow-mode off.");
+            SetStatus("Follow-mode off.", StatusLevel.Info);
         }
     }
 
@@ -149,13 +177,13 @@ public partial class ControlWindow : Window
         {
             _loopback.Stop();
             ListenButton.Content = "Start listening";
-            SetStatus("Stopped listening to incoming audio.");
+            SetStatus("Stopped listening to incoming audio.", StatusLevel.Info);
             return;
         }
 
         try
         {
-            SetStatus("Preparing transcription model…");
+            SetStatus("Preparing transcription model…", StatusLevel.Busy);
             await _models.EnsureWhisperModelAsync(new Progress<string>(SetStatus));
 
             if (_loopback is null)
@@ -169,10 +197,11 @@ public partial class ControlWindow : Window
 
             _loopback.Start();
             ListenButton.Content = "Stop listening";
+            SetStatus("Capturing incoming audio.", StatusLevel.Live);
         }
         catch (Exception ex)
         {
-            SetStatus($"Could not start transcription: {ex.Message}");
+            SetStatus($"Could not start transcription: {ex.Message}", StatusLevel.Error);
         }
     }
 
@@ -181,7 +210,7 @@ public partial class ControlWindow : Window
         if (!string.IsNullOrEmpty(_state.TranscriptionText))
         {
             Clipboard.SetText(_state.TranscriptionText);
-            SetStatus("Transcript copied to clipboard.");
+            SetStatus("Transcript copied to clipboard.", StatusLevel.Info);
         }
     }
 

@@ -22,8 +22,10 @@ public partial class PrompterWindow : Window
     private readonly Stopwatch _clock = new();
     private double _lastElapsedSeconds;
 
-    private static readonly Brush DimBrush = new SolidColorBrush(Color.FromRgb(0x88, 0x88, 0x88));
-    private static readonly Brush ActiveBrush = Brushes.White;
+    // Restyled for the design pass: softer neutral for neighbouring sentences.
+    private static readonly Brush DimBrush = new SolidColorBrush(Color.FromRgb(0x70, 0x70, 0x70));
+    // Active sentence: warm amber, matching the ControlWindow accent.
+    private static readonly Brush ActiveBrush = new SolidColorBrush(Color.FromRgb(0xF6, 0xC0, 0x65));
 
     public PrompterWindow(AppState state)
     {

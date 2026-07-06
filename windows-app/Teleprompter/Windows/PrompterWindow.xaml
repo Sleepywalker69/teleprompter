@@ -10,26 +10,61 @@
         ShowInTaskbar="False"
         ShowActivated="False">
 
-    <!-- Semi-transparent dark backdrop so the text is readable over anything -->
-    <Border Background="#CC000000">
-        <Grid x:Name="ClipHost" ClipToBounds="True">
-            <Grid.LayoutTransform>
-                <!-- Mirror mode for hardware teleprompter rigs (ScaleX = -1) -->
-                <ScaleTransform x:Name="MirrorTransform" ScaleX="1" ScaleY="1" />
-            </Grid.LayoutTransform>
+    <!-- Semi-opaque dark backdrop so the text stays readable over any webcam
+         scene. Slightly darker than before (#E6 vs #CC) for a touch more
+         contrast; still clearly see-through around the edges. -->
+    <Border Background="#E6000000">
+        <Grid>
+            <!-- Scrolling / mirrored text host (transforms live here only) -->
+            <Grid x:Name="ClipHost" ClipToBounds="True">
+                <Grid.LayoutTransform>
+                    <!-- Mirror mode for hardware teleprompter rigs (ScaleX = -1) -->
+                    <ScaleTransform x:Name="MirrorTransform" ScaleX="1" ScaleY="1" />
+                </Grid.LayoutTransform>
 
-            <TextBlock x:Name="PrompterText"
-                       Foreground="#888888"
-                       FontWeight="Light"
-                       TextAlignment="Center"
-                       TextWrapping="Wrap"
-                       LineHeight="1.6"
-                       Padding="60,20"
-                       VerticalAlignment="Top">
-                <TextBlock.RenderTransform>
-                    <TranslateTransform x:Name="ScrollTransform" Y="0" />
-                </TextBlock.RenderTransform>
-            </TextBlock>
+                <TextBlock x:Name="PrompterText"
+                           Foreground="#707070"
+                           FontFamily="Segoe UI"
+                           FontWeight="Light"
+                           TextAlignment="Center"
+                           TextWrapping="Wrap"
+                           LineHeight="1.6"
+                           Padding="80,24"
+                           VerticalAlignment="Top">
+                    <TextBlock.RenderTransform>
+                        <TranslateTransform x:Name="ScrollTransform" Y="0" />
+                    </TextBlock.RenderTransform>
+                </TextBlock>
+            </Grid>
+
+            <!-- Reading polish (non-interactive, sits above the text, never
+                 scrolls or mirrors): a faint amber centre guide and soft
+                 top/bottom fades so lines ease in and out of view. -->
+            <Rectangle Height="1" VerticalAlignment="Center" IsHitTestVisible="False">
+                <Rectangle.Fill>
+                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                        <GradientStop Color="#00E8A33D" Offset="0.0" />
+                        <GradientStop Color="#4DE8A33D" Offset="0.5" />
+                        <GradientStop Color="#00E8A33D" Offset="1.0" />
+                    </LinearGradientBrush>
+                </Rectangle.Fill>
+            </Rectangle>
+            <Rectangle Height="52" VerticalAlignment="Top" IsHitTestVisible="False">
+                <Rectangle.Fill>
+                    <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                        <GradientStop Color="#E6000000" Offset="0.0" />
+                        <GradientStop Color="#00000000" Offset="1.0" />
+                    </LinearGradientBrush>
+                </Rectangle.Fill>
+            </Rectangle>
+            <Rectangle Height="52" VerticalAlignment="Bottom" IsHitTestVisible="False">
+                <Rectangle.Fill>
+                    <LinearGradientBrush StartPoint="0,1" EndPoint="0,0">
+                        <GradientStop Color="#E6000000" Offset="0.0" />
+                        <GradientStop Color="#00000000" Offset="1.0" />
+                    </LinearGradientBrush>
+                </Rectangle.Fill>
+            </Rectangle>
         </Grid>
     </Border>
 </Window>
