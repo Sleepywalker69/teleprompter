@@ -11,3 +11,7 @@ vosk-model-*/
 # IDE
 .vs/
 *.user
+
+# Python (model pre-install script)
+__pycache__/
+*.pyc
